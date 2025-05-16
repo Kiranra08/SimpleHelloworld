@@ -6,3 +6,9 @@ jobs:
      steps:
        - name: Helloworld
          run: echo "Hello World"
+
+  kiran-jobs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: How are you
+        run: echo "Hey kiran How are you"
