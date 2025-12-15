@@ -1,0 +1,11 @@
+name: PR Checks
+
+on: pull_request
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          [ -f Dockerfile ] || (echo "Dockerfile missing" && exit 1)
