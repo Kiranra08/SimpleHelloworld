@@ -1,11 +1,47 @@
-name: PR Checks
+name: PR Checks - Standards
 
-on: pull_request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  check:
+  standards-check:
+    name: Repository Standards Validation
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
-      - uses: actions/checkout@v4
-      - run: |
-          [ -f Dockerfile ] || (echo "Dockerfile missing" && exit 1)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 1️⃣ Check Dockerfile
+      - name: Validate Dockerfile presence
+        id: dockerfile_check
+        run: |
+          if [ ! -f Dockerfile ]; then
+            echo "missing=true" >> $GITHUB_OUTPUT
+            echo "::error::Dockerfile is missing"
+            exit 1
+          else
+            echo "missing=false" >> $GITHUB_OUTPUT
+          fi
+
+      # 2️⃣ Suggestion comment on PR
+      - name: Add PR suggestion
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `⚠️ **Suggestion**
+              
+              This pull request does not include a **Dockerfile**.
+              
+              Please add a Dockerfile before merging to ensure consistent builds and deployments.`
+            })
